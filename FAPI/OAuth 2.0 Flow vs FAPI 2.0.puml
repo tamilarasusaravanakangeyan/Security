@@ -1,0 +1,30 @@
+@startuml
+title Normal OAuth 2.0 vs FAPI 2.0 Flow Comparison
+
+actor User
+participant "Client App" as App
+participant "Authorization Server (IdP)" as Auth
+participant "Resource Server (API)" as API
+
+== Normal OAuth 2.0 Flow ==
+User -> App : Click "Login with Airline ID"
+App -> Auth : Redirect with parameters (in query)
+User -> Auth : Enters credentials (password or SSO)
+Auth -> App : Redirect with Authorization Code
+App -> Auth : POST code to token endpoint
+Auth -> App : Returns Access Token (Bearer)
+App -> API : Call API with access token
+API -> App : Respond with data
+
+== FAPI 2.0 Flow ==
+User -> App : Click "Login with Airline ID"
+App -> Auth : Pushed Auth Request (PAR) (secure POST)
+App -> Auth : Redirect with `request_uri`
+User -> Auth : MFA Login (strong auth)
+Auth -> App : Redirect with code (JARM signed)
+App -> Auth : Token request (mTLS or JWT auth)
+Auth -> App : DPoP-bound access token
+App -> API : API call with DPoP + access token
+API -> App : Validates DPoP and responds
+
+@enduml
